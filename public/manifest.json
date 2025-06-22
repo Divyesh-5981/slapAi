@@ -1,0 +1,17 @@
+{
+  "name": "PitchSlap.ai",
+  "short_name": "PitchSlap",
+  "description": "Get brutally honest AI roasts of your startup ideas",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1f2937",
+  "theme_color": "#8b5cf6",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
