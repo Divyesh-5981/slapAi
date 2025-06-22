@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Trophy, Medal, Crown, Star, TrendingUp, Users, Calendar, Zap } from 'lucide-react';
 import { useLoading } from '../context/LoadingContext';
 import { getGlobalLeaderboard, getCurrentUser, getUserRankPosition, updateUserAlias, STARTUP_RANKS, calculateRank } from '../services/xpService';
@@ -51,6 +51,27 @@ const LeaderboardMode: React.FC = () => {
     }
   }, [staggerIn]);
 
+  // Memoized filtered leaderboard to prevent unnecessary re-renders
+  const filteredLeaderboard = useMemo(() => {
+    const now = new Date();
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    return leaderboard.filter(user => {
+      const lastActivity = new Date(user.lastActivity);
+      
+      switch (selectedTimeframe) {
+        case 'week':
+          return lastActivity >= oneWeekAgo;
+        case 'month':
+          return lastActivity >= oneMonthAgo;
+        case 'all':
+        default:
+          return true;
+      }
+    });
+  }, [leaderboard, selectedTimeframe]);
+
   const handleAliasUpdate = () => {
     if (newAlias.trim()) {
       const updatedUser = updateUserAlias(newAlias);
@@ -85,6 +106,26 @@ const LeaderboardMode: React.FC = () => {
     const target = e.currentTarget;
     pulseHover(target);
     callback();
+  };
+
+  // Optimized timeframe button handler to prevent flicker
+  const handleTimeframeChange = (timeframe: 'all' | 'week' | 'month') => {
+    if (timeframe !== selectedTimeframe) {
+      setSelectedTimeframe(timeframe);
+    }
+  };
+
+  const getTimeframeLabel = (timeframe: 'all' | 'week' | 'month') => {
+    switch (timeframe) {
+      case 'all': return 'All Time';
+      case 'week': return 'This Week';
+      case 'month': return 'This Month';
+      default: return 'All Time';
+    }
+  };
+
+  const getActiveUserCount = () => {
+    return filteredLeaderboard.length;
   };
 
   return (
@@ -231,47 +272,57 @@ const LeaderboardMode: React.FC = () => {
               Global Leaderboard
             </h2>
             <div className="text-sm text-gray-400">
-              {leaderboard.length} active entrepreneurs
+              {getActiveUserCount()} active entrepreneurs
             </div>
           </div>
 
-          {/* Timeframe Filter */}
+          {/* Timeframe Filter - Optimized to prevent flicker */}
           <div className="flex gap-2">
             {(['all', 'week', 'month'] as const).map((timeframe) => (
               <button
                 key={timeframe}
-                onClick={handleButtonClick(() => setSelectedTimeframe(timeframe))}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+                onClick={handleButtonClick(() => handleTimeframeChange(timeframe))}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 transform hover:scale-105 ${
                   selectedTimeframe === timeframe
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-800/50 text-gray-300 hover:bg-purple-900/30'
+                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/25'
+                    : 'bg-gray-800/50 text-gray-300 hover:bg-purple-900/30 hover:text-white'
                 }`}
               >
-                {timeframe === 'all' ? 'All Time' : `This ${timeframe.charAt(0).toUpperCase() + timeframe.slice(1)}`}
+                {getTimeframeLabel(timeframe)}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Leaderboard List */}
+        {/* Leaderboard List - Memoized and optimized */}
         <div className="p-8">
-          {leaderboard.length === 0 ? (
+          {filteredLeaderboard.length === 0 ? (
             <div className="text-center py-12">
               <Trophy className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-              <div className="text-xl text-gray-400 mb-2">No entrepreneurs yet!</div>
-              <div className="text-sm text-gray-500">Be the first to submit a pitch and claim the top spot!</div>
+              <div className="text-xl text-gray-400 mb-2">
+                {selectedTimeframe === 'all' 
+                  ? 'No entrepreneurs yet!' 
+                  : `No activity in the selected timeframe!`
+                }
+              </div>
+              <div className="text-sm text-gray-500">
+                {selectedTimeframe === 'all'
+                  ? 'Be the first to submit a pitch and claim the top spot!'
+                  : 'Try selecting a different time period or be the first to get active!'
+                }
+              </div>
             </div>
           ) : (
             <div className="space-y-4">
-              {leaderboard.slice(0, 50).map((user, index) => {
+              {filteredLeaderboard.slice(0, 50).map((user, index) => {
                 const position = index + 1;
                 const isCurrentUser = user.id === currentUser.id;
                 const userRank = calculateRank(user.xp);
                 
                 return (
                   <div
-                    key={user.id}
-                    className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 hover:scale-[1.02] ${
+                    key={`${user.id}-${selectedTimeframe}`} // Stable key to prevent flicker
+                    className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200 hover:scale-[1.02] ${
                       isCurrentUser 
                         ? 'bg-purple-900/30 border-purple-500/50 ring-2 ring-purple-500/30' 
                         : getPositionColor(position)
