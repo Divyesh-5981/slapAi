@@ -9,7 +9,7 @@ import ActionButton from '../components/ui/ActionButton';
 import BrandingResult from '../components/ui/BrandingResult';
 
 const BrandingMode: React.FC = () => {
-  const { setIsPageLoading } = useLoading();
+  const { setIsPageLoading, setLoadingMessage } = useLoading();
   const [pitch, setPitch] = useState('');
   const [brandingData, setBrandingData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -23,6 +23,8 @@ const BrandingMode: React.FC = () => {
   const handleGenerate = async () => {
     if (!pitch.trim()) return;
     
+    setLoadingMessage('AI is crafting your brand identity...');
+    setIsPageLoading(true);
     setIsLoading(true);
     setHasResult(false);
     setError('');
@@ -53,6 +55,7 @@ const BrandingMode: React.FC = () => {
       setHasResult(true);
     } finally {
       setIsLoading(false);
+      setIsPageLoading(false);
     }
   };
 

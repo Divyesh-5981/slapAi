@@ -15,7 +15,7 @@ import PitchSuggestionChips from '../components/ui/PitchSuggestionChips';
 import GlassmorphismCard from '../components/ui/GlassmorphismCard';
 
 const RoastMode: React.FC = () => {
-  const { setIsPageLoading } = useLoading();
+  const { setIsPageLoading, setLoadingMessage } = useLoading();
   const [pitch, setPitch] = useState('');
   const [roast, setRoast] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -32,6 +32,8 @@ const RoastMode: React.FC = () => {
   const handleGenerate = async () => {
     if (!pitch.trim()) return;
     
+    setLoadingMessage('AI is crafting your personalized roast...');
+    setIsPageLoading(true);
     setIsLoading(true);
     setHasResult(false);
     setError('');
@@ -61,6 +63,7 @@ const RoastMode: React.FC = () => {
       setHasResult(true);
     } finally {
       setIsLoading(false);
+      setIsPageLoading(false);
     }
   };
 

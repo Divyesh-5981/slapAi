@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Mic, Play, Pause, Volume2, VolumeX, RotateCcw } from 'lucide-react';
 import { generateVoiceRoast, getVoicePersonalities, VoiceOptions } from '../../services/voiceService';
+import { useLoading } from '../../context/LoadingContext';
 import { useAnimations } from '../../hooks/useAnimations';
 
 interface VoiceRoastProps {
@@ -9,6 +10,7 @@ interface VoiceRoastProps {
 }
 
 const VoiceRoast: React.FC<VoiceRoastProps> = ({ roastText, onError }) => {
+  const { setIsPageLoading, setLoadingMessage } = useLoading();
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState<string>('savage-vc');
@@ -76,6 +78,8 @@ const VoiceRoast: React.FC<VoiceRoastProps> = ({ roastText, onError }) => {
       currentUtterance.current = null;
     }
 
+    setLoadingMessage('AI is generating voice roast...');
+    setIsPageLoading(true);
     setIsGenerating(true);
     setError('');
     setIsPlaying(false);
@@ -136,6 +140,7 @@ const VoiceRoast: React.FC<VoiceRoastProps> = ({ roastText, onError }) => {
       onError?.(errorMessage);
     } finally {
       setIsGenerating(false);
+      setIsPageLoading(false);
     }
   };
 

@@ -9,7 +9,7 @@ import ActionButton from '../components/ui/ActionButton';
 import ScorecardResult from '../components/ui/ScorecardResult';
 
 const ScorecardMode: React.FC = () => {
-  const { setIsPageLoading } = useLoading();
+  const { setIsPageLoading, setLoadingMessage } = useLoading();
   const [pitch, setPitch] = useState('');
   const [scorecardData, setScorecardData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -23,6 +23,8 @@ const ScorecardMode: React.FC = () => {
   const handleGenerate = async () => {
     if (!pitch.trim()) return;
     
+    setLoadingMessage('AI is analyzing and scoring your pitch...');
+    setIsPageLoading(true);
     setIsLoading(true);
     setHasResult(false);
     setError('');
@@ -56,6 +58,7 @@ const ScorecardMode: React.FC = () => {
       setHasResult(true);
     } finally {
       setIsLoading(false);
+      setIsPageLoading(false);
     }
   };
 

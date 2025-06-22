@@ -9,7 +9,7 @@ import ActionButton from '../components/ui/ActionButton';
 import ResultCard from '../components/ui/ResultCard';
 
 const FixItMode: React.FC = () => {
-  const { setIsPageLoading } = useLoading();
+  const { setIsPageLoading, setLoadingMessage } = useLoading();
   const [pitch, setPitch] = useState('');
   const [fixedPitch, setFixedPitch] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -23,6 +23,8 @@ const FixItMode: React.FC = () => {
   const handleGenerate = async () => {
     if (!pitch.trim()) return;
     
+    setLoadingMessage('AI is rewriting your pitch...');
+    setIsPageLoading(true);
     setIsLoading(true);
     setHasResult(false);
     setError('');
@@ -45,6 +47,7 @@ const FixItMode: React.FC = () => {
       setHasResult(true);
     } finally {
       setIsLoading(false);
+      setIsPageLoading(false);
     }
   };
 

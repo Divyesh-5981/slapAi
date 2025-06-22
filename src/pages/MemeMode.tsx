@@ -9,7 +9,7 @@ import ActionButton from '../components/ui/ActionButton';
 import MemeResult from '../components/ui/MemeResult';
 
 const MemeMode: React.FC = () => {
-  const { setIsPageLoading } = useLoading();
+  const { setIsPageLoading, setLoadingMessage } = useLoading();
   const [pitch, setPitch] = useState('');
   const [memeData, setMemeData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -23,6 +23,8 @@ const MemeMode: React.FC = () => {
   const handleGenerate = async () => {
     if (!pitch.trim()) return;
     
+    setLoadingMessage('AI is creating your viral meme...');
+    setIsPageLoading(true);
     setIsLoading(true);
     setHasResult(false);
     setError('');
@@ -51,6 +53,7 @@ const MemeMode: React.FC = () => {
       setHasResult(true);
     } finally {
       setIsLoading(false);
+      setIsPageLoading(false);
     }
   };
 

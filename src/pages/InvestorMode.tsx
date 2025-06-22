@@ -21,7 +21,7 @@ import InvestmentResultModal from '../components/ui/InvestmentResultModal';
 import { useAnimations } from '../hooks/useAnimations';
 
 const InvestorMode: React.FC = () => {
-  const { setIsPageLoading } = useLoading();
+  const { setIsPageLoading, setLoadingMessage } = useLoading();
   const [currentPitch, setCurrentPitch] = useState<StartupPitch | null>(null);
   const [investorProfile, setInvestorProfile] = useState(getInvestorProfile());
   const [showResult, setShowResult] = useState(false);
@@ -58,6 +58,8 @@ const InvestorMode: React.FC = () => {
   const handleInvestmentDecision = async (decision: InvestmentDecision) => {
     if (!currentPitch) return;
 
+    setLoadingMessage('Analyzing investment outcome...');
+    setIsPageLoading(true);
     setIsRevealing(true);
 
     // Simulate dramatic reveal delay
@@ -74,6 +76,7 @@ const InvestorMode: React.FC = () => {
     setShowResult(true);
     setIsRevealing(false);
     setRoundNumber(prev => prev + 1);
+    setIsPageLoading(false);
   };
 
   const handleNextRound = () => {
